@@ -84,6 +84,51 @@ class AuthController extends Controller
         return response()->json(auth()->user());
     }
 
+    public function ChangeEmail(Request $request)
+    {
+        $oldEmail = auth()->user()->email;
+
+        $validator = Validator::make($request->all(), [
+            'email' => ['required', 'string', 'max:255', 'email', 'unique:users'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        if ($oldEmail != $request->email) {
+            auth()->user()->status = 'registered';
+        }
+        
+        $user = auth()->user();
+
+        $token = auth()->login($user);
+        
+        $mailVerified = MailVerification::create([
+            'user_id' => $user->id,
+            'token' => $token
+        ]);
+
+        auth()->user()->email = $request->email;
+
+        $mailVerified->status = 'registered';
+        $mailVerified->save();
+
+        $user->status = 'registered';
+        $user->save();
+
+        Mail::send('email.verify', ['user' => $user, 'mailVerified' => $mailVerified, 'token' => $token], function($mail) use ($user) {
+            $mail->to($user->email, $user->name);
+            $mail->subject('Verify your email address');
+        });
+
+        response()->json([
+            'status' => 'success',
+            'message' => 'we sent you an activation code. check your email and click on the link to verify.',
+            'token' => $token,
+        ], 200);
+    }
+
     protected function respondWithToken ($token)
     {
         return response()->json([

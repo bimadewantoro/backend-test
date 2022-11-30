@@ -17,16 +17,17 @@ class WalletController extends Controller
     public function store (Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_user' => 'required',
-            'id_currency' => 'required',
-            'balance' => 'required',
+            'amount' => 'required',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
-        $wallet = Wallet::create($request->all());
+        $user = auth()->user();
+        $data = $request->all();
+        $data['user_id'] = $user->id;
+        $wallet = Wallet::create($data);
         return response()->json($wallet, 201);
     }
 

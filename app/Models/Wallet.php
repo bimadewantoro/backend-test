@@ -15,9 +15,8 @@ class Wallet extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'id_user',
-        'id_currency',
-        'balance',
+        'user_id',
+        'amount',
     ];
 
     /**
@@ -26,7 +25,7 @@ class Wallet extends Model
      * @var array<int, string>
      */
     protected $hidden = [
-        'id_user',
+        'user_id',
         'id_currency',
     ];
 
@@ -39,5 +38,10 @@ class Wallet extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 }

@@ -24,4 +24,5 @@ Route::post('login', [AuthController::class, 'login']);
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('logout', [AuthController::class, 'logout']);
     Route::get('user/{id}', [AuthController::class, 'me']);
+    Route::put('change-email', [AuthController::class, 'ChangeEmail']);
 });
